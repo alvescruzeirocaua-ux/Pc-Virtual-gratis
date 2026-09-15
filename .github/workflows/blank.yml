@@ -1,0 +1,66 @@
+name: Windows Virtual PC - Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
+
+      - name: Mostrar informações do Windows
+        shell: powershell
+        run: |
+          Write-Host "=== SISTEMA ==="
+          Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OsArchitecture
+          Write-Host ""
+          Write-Host "=== PROCESSADOR ==="
+          Get-CimInstance Win32_Processor |
+            Select-Object Name, NumberOfCores, NumberOfLogicalProcessors
+          Write-Host ""
+          Write-Host "=== MEMÓRIA ==="
+          Get-CimInstance Win32_ComputerSystem |
+            Select-Object TotalPhysicalMemory
+
+      - name: Preparar pasta de build
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path build
+          Write-Host "Pasta build criada."
+
+      - name: Executar build
+        shell: powershell
+        run: |
+          Write-Host "Iniciando build..."
+
+          if (Test-Path ".\build.ps1") {
+              .\build.ps1
+          }
+          elseif (Test-Path ".\build.bat") {
+              .\build.bat
+          }
+          else {
+              Write-Host "Nenhum build.ps1 ou build.bat encontrado."
+              Write-Host "O ambiente Windows foi iniciado normalmente."
+          }
+
+      - name: Listar arquivos gerados
+        shell: powershell
+        run: |
+          Write-Host "=== ARQUIVOS DO PROJETO ==="
+          Get-ChildItem -Recurse -File |
+            Select-Object FullName, Length |
+            Format-Table -AutoSize
+
+      - name: Enviar build como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            build/
+            dist/
+            *.exe
+          if-no-files-found: warn
