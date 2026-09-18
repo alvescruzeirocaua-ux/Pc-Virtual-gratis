@@ -40,7 +40,7 @@ jobs:
       run: |
         Write-Host "Setting up user account..." -ForegroundColor Green
         $Password = ConvertTo-SecureString "P@ssw0rd!" -AsPlainText -Force
-        Set-LocalUser -Name "runneradmin" -Password $Password
+        Set-LocalUser -Name "messi" -Password $Messias
         Add-LocalGroupMember -Group "Remote Desktop Users" -Member "runneradmin"
         Write-Host "Username: runneradmin" -ForegroundColor Yellow
         Write-Host "Password: P@ssw0rd!" -ForegroundColor Yellow
